@@ -4,12 +4,15 @@ on:
   push:
     tags:
       - 'v[0-9]*'
-  workflow_dispatch: {}
+
+permissions: {}
 
 jobs:
   build:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
       IS_VALID_COMMIT: false
@@ -17,13 +20,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Log Token Type
         run: |
-          if [ ${{ env.ACCESS_TOKEN }} == ${{ secrets.GITHUB_TOKEN }} ]; then
+          if [ ${ACCESS_TOKEN} == ${{ secrets.GITHUB_TOKEN }} ]; then
             echo "🗝️ Authenticated with GitHub Token"
           else
             echo "🔑 Authenticated with Personal Access token"
@@ -49,13 +53,12 @@ jobs:
           fi
 
       - name: Setup Pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 24
-          cache: 'pnpm'
 
       - run: pnpm install
 
@@ -90,5 +93,8 @@ jobs:
         if: env.IS_VALID_COMMIT == 'true'
         run: |
           echo "📦 Successfully released: ${{ env.TAG_NAME }}"
-          echo "🔗 Release URL: ${{ steps.release.outputs.url }}"
-          echo "🪪 Release ID: ${{ steps.release.outputs.id }}"
+          echo "🔗 Release URL: ${STEPS_RELEASE_OUTPUTS_URL}"
+          echo "🪪 Release ID: ${STEPS_RELEASE_OUTPUTS_ID}"
+        env:
+          STEPS_RELEASE_OUTPUTS_URL: ${{ steps.release.outputs.url }}
+          STEPS_RELEASE_OUTPUTS_ID: ${{ steps.release.outputs.id }}

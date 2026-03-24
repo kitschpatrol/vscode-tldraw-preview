@@ -27,49 +27,78 @@ const delimiterPairs: Record<string, string> = {
 }
 
 /**
- * Find an aphex URL at the given position in a line, handling paths with spaces
- * when they're inside quotes or angle brackets.
+ * Find a `.tldr` file path at the given position in a line, handling paths
+ * with spaces when they're inside quotes or angle brackets.
  */
-function findAphexUrlAtPosition(
+function findTldrPathAtPosition(
 	line: string,
 	character: number,
-): undefined | { end: number; start: number; url: string } {
-	const aphexMarker = '~aphex/'
+): undefined | { end: number; path: string; start: number } {
+	const tldrExtension = '.tldr'
 	let searchIndex = 0
 
 	// eslint-disable-next-line ts/no-unnecessary-condition
 	while (true) {
-		const startOfAphex = line.indexOf(aphexMarker, searchIndex)
-		if (startOfAphex === -1) break
+		const tldrIndex = line.indexOf(tldrExtension, searchIndex)
+		if (tldrIndex === -1) {
+			break
+		}
 
-		// Look at the character before ~aphex/ to determine the delimiter
-		const charBefore = startOfAphex > 0 ? line[startOfAphex - 1] : ''
-		const closingDelimiter = delimiterPairs[charBefore]
+		// Walk backward from the `.tldr` to find the start of the path
+		let startIndex = tldrIndex
+		let openingDelimiter = ''
 
+		for (let i = tldrIndex - 1; i >= 0; i--) {
+			const char = line[i]
+
+			// If we hit a known opening delimiter, the path starts after it
+			if (char in delimiterPairs) {
+				openingDelimiter = char
+				startIndex = i + 1
+				break
+			}
+
+			// If we hit whitespace or a closing bracket, stop
+			if (/[\s)[\]>]/.test(char)) {
+				startIndex = i + 1
+				break
+			}
+
+			startIndex = i
+		}
+
+		// Determine end boundary
+		const closingDelimiter = delimiterPairs[openingDelimiter]
+		const afterTldr = tldrIndex + tldrExtension.length
 		let endIndex: number
 
 		if (closingDelimiter) {
-			// Path is inside quotes or angle brackets - find the closing delimiter
-			endIndex = line.indexOf(closingDelimiter, startOfAphex)
-			if (endIndex === -1) endIndex = line.length
+			// Inside delimiters — include everything up to the closing delimiter
+			const closePos = line.indexOf(closingDelimiter, afterTldr)
+			endIndex = closePos === -1 ? afterTldr : closePos
 		} else {
-			// No delimiter - stop at whitespace or common terminators
-			const remaining = line.slice(Math.max(0, startOfAphex))
+			// No delimiter — stop at whitespace or common terminators
+			const remaining = line.slice(Math.max(0, afterTldr))
 			const match = /[\s"'`()[\]<>]/.exec(remaining)
-			endIndex = match?.index === undefined ? line.length : startOfAphex + match.index
+			endIndex = match?.index === undefined ? line.length : afterTldr + match.index
 		}
 
-		// Check if cursor is within this URL
-		if (character >= startOfAphex && character <= endIndex) {
+		// If nothing after `.tldr`, end right at the extension
+		if (endIndex < afterTldr) {
+			endIndex = afterTldr
+		}
+
+		// Check if cursor is within this path
+		if (character >= startIndex && character <= endIndex) {
 			return {
 				end: endIndex,
-				start: startOfAphex,
 				// eslint-disable-next-line unicorn/prefer-string-slice
-				url: line.substring(startOfAphex, endIndex),
+				path: line.substring(startIndex, endIndex),
+				start: startIndex,
 			}
 		}
 
-		searchIndex = startOfAphex + 1
+		searchIndex = tldrIndex + 1
 	}
 
 	return undefined
@@ -103,10 +132,10 @@ function getManifestPath(document: vscode.TextDocument): string | undefined {
 		return undefined
 	}
 
-	const config = vscode.workspace.getConfiguration('aphex-preview')
+	const config = vscode.workspace.getConfiguration('tldraw-preview')
 	const configuredPath = config.get<string>(
 		'manifestPath',
-		'node_modules/.cache/aphex/.aphex-plugin-cache.json',
+		'node_modules/.cache/tldraw/.tldraw-plugin-cache.json',
 	)
 
 	if (path.isAbsolute(configuredPath)) {
@@ -116,36 +145,121 @@ function getManifestPath(document: vscode.TextDocument): string | undefined {
 	return path.join(workspaceFolder.uri.fsPath, configuredPath)
 }
 
-function createHoverContent(
-	url: string,
+/**
+ * Parse import query params into the JSON format used by unplugin-tldraw for manifest keys.
+ * Mirrors the parsing logic in unplugin-tldraw's `parseImportOverrides`.
+ */
+function parseQueryToManifestKey(queryString: string): string {
+	const params = new URLSearchParams(queryString)
+	const overrides: Record<string, boolean | number | string> = {}
+
+	for (const [key, value] of params.entries()) {
+		if (key === 'tldr' || key === 'tldraw') {
+			continue
+		}
+
+		switch (key) {
+			case 'dark':
+			case 'stripStyle':
+			case 'transparent': {
+				overrides[key] = value === 'true' || value === ''
+				break
+			}
+
+			case 'format':
+			case 'frame':
+			case 'page': {
+				overrides[key] = value
+				break
+			}
+
+			case 'padding':
+			case 'scale': {
+				const numberValue = Number(value)
+				if (!Number.isNaN(numberValue)) {
+					overrides[key] = numberValue
+				}
+
+				break
+			}
+
+			default: {
+				break
+			}
+		}
+	}
+
+	return Object.keys(overrides).length > 0 ? JSON.stringify(overrides) : ''
+}
+
+/**
+ * Look up a `.tldr` path in the manifest.
+ * Keys in the manifest are relative to the cache directory, with query params
+ * stored as JSON (e.g. `path.tldr?{"dark":true}`).
+ */
+function findManifestEntry(
+	relativeTldrPath: string,
+	queryString: string | undefined,
 	manifest: Manifest,
-	workspaceRoot: string,
+): ManifestEntry | undefined {
+	if (queryString) {
+		const manifestQuery = parseQueryToManifestKey(queryString)
+		if (manifestQuery) {
+			const keyWithQuery = `${relativeTldrPath}?${manifestQuery}`
+			// eslint-disable-next-line ts/no-unnecessary-condition
+			if (manifest[keyWithQuery]) {
+				return manifest[keyWithQuery]
+			}
+		}
+	}
+
+	// Exact match without query string
+	// eslint-disable-next-line ts/no-unnecessary-condition
+	if (manifest[relativeTldrPath]) {
+		return manifest[relativeTldrPath]
+	}
+
+	return undefined
+}
+
+function createHoverContent(
+	tldrPath: string,
+	manifest: Manifest,
+	manifestPath: string,
+	documentDirectory: string,
 ): vscode.MarkdownString {
-	const config = vscode.workspace.getConfiguration('aphex-preview')
+	const config = vscode.workspace.getConfiguration('tldraw-preview')
 	const maxWidth = config.get<number>('maxWidth', 300)
 
-	const entry = manifest[url]
+	// Split path and query string
+	const queryIndex = tldrPath.indexOf('?')
+	const filePath = queryIndex === -1 ? tldrPath : tldrPath.slice(0, Math.max(0, queryIndex))
+	const queryString = queryIndex === -1 ? undefined : tldrPath.slice(Math.max(0, queryIndex + 1))
 
-	// eslint-disable-next-line ts/no-unnecessary-condition
+	// Resolve to absolute, then make relative to cache directory (manifest keys are relative to it)
+	const cacheDirectory = path.dirname(manifestPath)
+	const absolutePath = path.isAbsolute(filePath)
+		? filePath
+		: path.resolve(documentDirectory, filePath)
+	const relativeTldrPath = path.relative(cacheDirectory, absolutePath)
+
+	const entry = findManifestEntry(relativeTldrPath, queryString, manifest)
+
 	if (!entry) {
-		// Case 2: URL not found in manifest
 		const md = new vscode.MarkdownString()
 		md.isTrusted = true
 		md.supportHtml = true
 		md.appendMarkdown('### ⚠️ Not in cache\n\n')
-		md.appendMarkdown(`\`${url}\`\n\n`)
+		md.appendMarkdown(`\`${tldrPath}\`\n\n`)
 		md.appendMarkdown("This asset hasn't been cached yet.\n\n")
 		md.appendMarkdown('Run `pnpm build` or `vite build` to generate the cache.')
 		return md
 	}
 
-	// Resolve the cached file path
-	const cachedPath = path.isAbsolute(entry.result)
-		? entry.result
-		: path.join(workspaceRoot, entry.result)
+	// Resolve the cached file path relative to the cache directory
+	const cachedPath = path.join(cacheDirectory, entry.result)
 
 	if (!fs.existsSync(cachedPath)) {
-		// Case 3: URL in manifest but file doesn't exist
 		const md = new vscode.MarkdownString()
 		md.isTrusted = true
 		md.supportHtml = true
@@ -156,7 +270,6 @@ function createHoverContent(
 		return md
 	}
 
-	// Case 1: URL found and file exists - show image preview
 	const fileUri = vscode.Uri.file(cachedPath)
 	const md = new vscode.MarkdownString()
 	md.isTrusted = true
@@ -169,11 +282,11 @@ function createHoverContent(
 	return md
 }
 
-class AphexHoverProvider implements vscode.HoverProvider {
+class TldrawHoverProvider implements vscode.HoverProvider {
 	provideHover(document: vscode.TextDocument, position: vscode.Position): undefined | vscode.Hover {
 		const line = document.lineAt(position.line).text
 
-		const found = findAphexUrlAtPosition(line, position.character)
+		const found = findTldrPathAtPosition(line, position.character)
 		if (!found) {
 			return undefined
 		}
@@ -183,14 +296,10 @@ class AphexHoverProvider implements vscode.HoverProvider {
 			return undefined
 		}
 
-		const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri)
-		if (!workspaceFolder) {
-			return undefined
-		}
-
+		const documentDirectory = path.dirname(document.uri.fsPath)
 		const range = new vscode.Range(position.line, found.start, position.line, found.end)
 		const manifest = getManifest(manifestPath)
-		const content = createHoverContent(found.url, manifest, workspaceFolder.uri.fsPath)
+		const content = createHoverContent(found.path, manifest, manifestPath, documentDirectory)
 
 		return new vscode.Hover(content, range)
 	}
@@ -214,7 +323,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		scheme: 'file',
 	}))
 
-	const hoverProvider = vscode.languages.registerHoverProvider(selector, new AphexHoverProvider())
+	const hoverProvider = vscode.languages.registerHoverProvider(selector, new TldrawHoverProvider())
 
 	context.subscriptions.push(hoverProvider)
 }

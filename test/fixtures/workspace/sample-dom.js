@@ -1,7 +1,7 @@
-// Import image from Photos.app album path via Aphex
-import image from '~aphex/pets/tiny/portrait'
+// Import rendered tldraw drawing
+import drawing from './test-sketch.tldr'
 
 // Add it to the DOM
 const img = document.createElement('img')
-img.src = image
+img.src = drawing
 document.body.append(img)

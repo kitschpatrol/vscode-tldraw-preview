@@ -1,13 +1,13 @@
 /* eslint-disable ts/no-unused-vars */
 /* eslint-disable ts/naming-convention */
 
-const existingImage = '~aphex/pets/tiny/portrait'
-const missingFile = '~aphex/test/missing-file'
-const notCached = '~aphex/test/not-in-manifest'
-const noAphex = 'some/other/path'
-const inBrackets = ['~aphex/pets/tiny/portrait']
+const existingDrawing = './test-sketch.tldr'
+const missingFile = './missing.tldr'
+const notCached = './not-in-manifest.tldr'
+const noTldr = 'some/other/path'
+const inBrackets = ['./test-sketch.tldr']
 
 // prettier-ignore
-const inParens = ('~aphex/pets/tiny/portrait')
+const inParens = ('./test-sketch.tldr')
 
-const withSpaces = '~aphex/projects/album with spaces/building'
+const withQuery = './test-sketch.tldr?dark=true&tldr'
