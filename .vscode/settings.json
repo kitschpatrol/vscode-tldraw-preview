@@ -1,0 +1,70 @@
+{
+	"[astro]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[gitignore]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[ruby]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[shellscript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[svelte]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"cSpell.enabled": true,
+	"cSpell.workspaceRootPath": ".",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit",
+		"source.fixAll.stylelint": "explicit",
+		"source.fixAll.ts": "explicit",
+		"source.organizeImports": "never"
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"eslint.enable": true,
+	"eslint.runtime": "node",
+	"eslint.useFlatConfig": true,
+	"eslint.validate": [
+		"html",
+		"javascript",
+		"markdown",
+		"typescript",
+		"astro",
+		"javascriptreact",
+		"json",
+		"json5",
+		"jsonc",
+		"mdx",
+		"svelte",
+		"toml",
+		"typescriptreact",
+		"xml",
+		"yaml"
+	],
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.expand": false,
+	"explorer.fileNesting.patterns": {
+		".env": ".env.*, .template.env",
+		"*.js": "${basename}.ts.map, ${basename}.js.map, ${basename}.d.ts, ${basename}.d.ts.map, ${basename}.d.js.map",
+		"*.ts": "${basename}.ts.map, ${basename}.d.ts, ${basename}.d.ts.map",
+		"package.json": ".*.cjs, .*.js, .*.json, .*.mjs, .*.toml, .*.ts, .*.yaml, .*.yml, .*ignore, .*rc, .node-version, *config.cjs, *config.js, *config.json, *config.mjs, *config.toml, *config.ts, *config.mts, *config.yaml, *config.yml, tsconfig.*.json, lerna.json, netlify.toml, package-lock.json, pnpm*, turbo.json, vercel.json, workspace*, wrangler.toml, yarn.lock, yarn*",
+		"readme.md": "authors*, backers*, changelog*, citation*, code_of_conduct*, contributing*, contributors*, copying*, credits*, governance*, history*, license*, maintainers*, release_notes*, security*, sponsors*"
+	},
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
+	"prettier.documentSelectors": [
+		"**/.eslintignore",
+		"**/.node-version",
+		"**/.npmrc",
+		"**/.prettierignore",
+		"**/*.astro",
+		"**/*.rb",
+		"**/*.svelte"
+	],
+	"prettier.enable": true,
+	"stylelint.enable": true,
+	"stylelint.validate": ["css", "html", "svelte", "astro"]
+}

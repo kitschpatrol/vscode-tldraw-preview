@@ -1,0 +1,95 @@
+{
+	"name": "tldraw-preview",
+	"displayName": "Tldraw Preview",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Thumbnail preview images on hover for @kitschpatrol/unplugin-tldraw file paths.",
+	"categories": [
+		"Other"
+	],
+	"keywords": [
+		"vscode",
+		"vsc",
+		"extension",
+		"tldraw",
+		"tldr"
+	],
+	"homepage": "https://github.com/kitschpatrol/vscode-tldraw-preview#readme",
+	"bugs": {
+		"url": "https://github.com/kitschpatrol/vscode-tldraw-preview/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kitschpatrol/vscode-tldraw-preview.git"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "Eric Mika",
+		"email": "eric@ericmika.com",
+		"url": "https://ericmika.com"
+	},
+	"publisher": "kitschpatrol",
+	"type": "commonjs",
+	"main": "./dist/extension.js",
+	"files": [
+		"dist",
+		"res",
+		"LICENSE.txt"
+	],
+	"scripts": {
+		"build": "tsc -p ./tsconfig.build.json",
+		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
+		"fix": "ksc fix",
+		"lint": "ksc lint",
+		"pack": "pnpm run build && vsce package --no-dependencies",
+		"release": "bumpp --commit 'Release: %s' && pnpm run build && vsce publish --no-dependencies --no-update-package-json --no-git-tag-version --pat $(op read 'op://Personal/Azure VS Code/credential')",
+		"pretest": "pnpm run build && tsc -p ./tsconfig.test.json",
+		"test": "node ./out-test/test/run-test.js",
+		"test-interactive": "code --extensionDevelopmentPath=\"$PWD\" test/fixtures/workspace"
+	},
+	"contributes": {
+		"configuration": {
+			"title": "Tldraw Preview",
+			"properties": {
+				"tldraw-preview.manifestPath": {
+					"type": "string",
+					"default": "node_modules/.cache/tldraw/.tldraw-plugin-cache.json",
+					"description": "Path to the unplugin-tldraw cache manifest file (relative to workspace root)"
+				},
+				"tldraw-preview.maxWidth": {
+					"type": "number",
+					"default": 300,
+					"description": "Maximum width in logical points for image previews"
+				}
+			}
+		}
+	},
+	"activationEvents": [
+		"onLanguage:mdx",
+		"onLanguage:html",
+		"onLanguage:markdown",
+		"onLanguage:astro",
+		"onLanguage:svelte",
+		"onLanguage:javascript",
+		"onLanguage:typescript",
+		"onLanguage:javascriptreact",
+		"onLanguage:typescriptreact"
+	],
+	"devDependencies": {
+		"@kitschpatrol/shared-config": "^6.1.0",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "~22.19.15",
+		"@types/vscode": "1.105.0",
+		"@vscode/test-electron": "^2.5.2",
+		"@vscode/vsce": "^3.7.1",
+		"bumpp": "^11.0.1",
+		"mocha": "^11.7.5",
+		"typescript": "~5.9.3"
+	},
+	"packageManager": "pnpm@10.33.0",
+	"engines": {
+		"node": ">=22.19.0",
+		"vscode": "^1.105.0"
+	},
+	"icon": "res/icon.png"
+}
