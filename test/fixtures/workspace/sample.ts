@@ -11,3 +11,4 @@ const inBrackets = ['./test-sketch.tldr']
 const inParens = ('./test-sketch.tldr')
 
 const withQuery = './test-sketch.tldr?dark=true&tldr'
+const tldrawFile = './sketch.tldraw'

@@ -47,6 +47,13 @@ function findTldrPathAtPosition(
 			break
 		}
 
+		// Reject matches inside longer extensions like `.tldraw`
+		const charAfter = line[tldrIndex + tldrExtension.length]
+		if (charAfter !== undefined && /[A-Za-z0-9]/.test(charAfter)) {
+			searchIndex = tldrIndex + 1
+			continue
+		}
+
 		// Walk backward from the `.tldr` to find the start of the path
 		let startIndex = tldrIndex
 		let openingDelimiter = ''
@@ -84,11 +91,6 @@ function findTldrPathAtPosition(
 			const remaining = line.slice(Math.max(0, afterTldr))
 			const match = COMMON_TERMINATORS_REGEX.exec(remaining)
 			endIndex = match?.index === undefined ? line.length : afterTldr + match.index
-		}
-
-		// If nothing after `.tldr`, end right at the extension
-		if (endIndex < afterTldr) {
-			endIndex = afterTldr
 		}
 
 		// Check if cursor is within this path

@@ -135,6 +135,17 @@ suite('Tldraw Hover Provider', () => {
 		assert.ok(text.includes('<img'), 'Should contain an img tag')
 	})
 
+	test('does not show hover for .tldraw paths (different extension)', async () => {
+		// Line 14: const tldrawFile = './sketch.tldraw'
+		const hovers = await getHoverAt(13, 25)
+
+		const hasTldrawHover = hovers?.some((h) => {
+			const text = getHoverText(h)
+			return text.includes('<img') || text.includes('Not in cache')
+		})
+		assert.ok(!hasTldrawHover, 'Should not show hover on .tldraw extension')
+	})
+
 	test('correctly handles .tldr path with query parameters', async () => {
 		// Line 13: const withQuery = './test-sketch.tldr?dark=true'
 		const hovers = await getHoverAt(12, 25)
