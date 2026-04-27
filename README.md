@@ -28,7 +28,7 @@
 
 ## Getting started
 
-_Let's assume you have [VS Code](https://code.visualstudio.com) installed and are working in a project using the [unplugin-tldraw](https://github.com/kitschpatrol/unplugin-tldraw) build tool plugin to render local tldraw `.tldr` files into SVGs or bitmaps in your build pipeline via [tldraw-cli](https://github.com/kitschpatrol/tldraw-cli)._
+_This extension assumes you have [VS Code](https://code.visualstudio.com) installed and are working in a project that uses the [unplugin-tldraw](https://github.com/kitschpatrol/unplugin-tldraw) build-tool plugin. That plugin renders local tldraw `.tldr` files into SVGs or bitmaps at build time via [tldraw-cli](https://github.com/kitschpatrol/tldraw-cli)._
 
 Install the extension from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=kitschpatrol.tldraw-preview), or run the following in VS Code's command palette:
 
@@ -36,13 +36,13 @@ Install the extension from the [Marketplace](https://marketplace.visualstudio.co
 ext install kitschpatrol.tldraw-preview
 ```
 
-Now, when you hover over a `.tldr` link in your code, you should see a live preview thumbnail of the referenced photo.
+Now, when you hover over a `.tldr` link in your code, you should see a live preview thumbnail of the referenced drawing.
 
 ![vscode-tldraw-preview banner](assets/screenshot.webp)
 
-For now, this extension does not itself resolve or fetch images; it only provides thumbnail previews for cached Tldraw URLs that have already been resolved by [unplugin-tldraw](https://github.com/kitschpatrol/unplugin-tldraw) via [tldraw-cli](https://github.com/kitschpatrol/tldraw-cli).
+For now, this extension does not itself resolve or fetch images; it only provides thumbnail previews for cached tldraw URLs that have already been resolved by [unplugin-tldraw](https://github.com/kitschpatrol/unplugin-tldraw) via [tldraw-cli](https://github.com/kitschpatrol/tldraw-cli).
 
-This extension is extremely niche and is _not_ a part of the official [tldraw](https://tldraw.dev) project. If you want an extension to actually edit `.tldr` files in VS Code, then you want the [official tldr extension](https://marketplace.visualstudio.com/items?itemName=tldraw-org.tldraw-vscode).
+This extension is extremely niche and is _not_ a part of the official [tldraw](https://tldraw.dev) project. If you want an extension to actually edit `.tldr` files in VS Code, then you want the [official tldraw extension](https://marketplace.visualstudio.com/items?itemName=tldraw-org.tldraw-vscode).
 
 ## Configuration
 
@@ -56,6 +56,8 @@ The extension provides the following settings:
 ## Supported file types
 
 Hover previews work in the following file types: JavaScript, TypeScript, JSX, TSX, Markdown, MDX, HTML, Astro, and Svelte.
+
+Query parameters on `.tldr` references (e.g. `./sketch.tldr?dark=true`) are matched against variant entries in the manifest. The `&tldr` and `&tldraw` suffix workarounds for [TypeScript issue #38638](https://github.com/microsoft/TypeScript/issues/38638) (e.g. `./sketch.tldr?format=png&tldr`) are recognized and stripped before lookup.
 
 ## Maintainers
 
