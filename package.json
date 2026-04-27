@@ -57,7 +57,7 @@
 				"tldraw-preview.manifestPath": {
 					"type": "string",
 					"default": "node_modules/.cache/tldraw/.tldraw-plugin-cache.json",
-					"description": "Path to the unplugin-tldraw cache manifest file (relative to workspace root)"
+					"description": "Path to the unplugin-tldraw cache manifest file. Absolute, or relative to the workspace root."
 				},
 				"tldraw-preview.maxWidth": {
 					"type": "number",

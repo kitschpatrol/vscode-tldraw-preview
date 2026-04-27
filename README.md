@@ -48,10 +48,10 @@ This extension is extremely niche and is _not_ a part of the official [tldraw](h
 
 The extension provides the following settings:
 
-| Setting                       | Default                                                | Description                               |
-| ----------------------------- | ------------------------------------------------------ | ----------------------------------------- |
-| `tldraw-preview.manifestPath` | `node_modules/.cache/tldraw/.tldraw-plugin-cache.json` | Path to the Tldraw cache manifest file    |
-| `tldraw-preview.maxWidth`     | `300`                                                  | Maximum width for image previews (points) |
+| Setting                       | Default                                                | Description                                                                                   |
+| ----------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `tldraw-preview.manifestPath` | `node_modules/.cache/tldraw/.tldraw-plugin-cache.json` | Path to the unplugin-tldraw cache manifest file. Absolute, or relative to the workspace root. |
+| `tldraw-preview.maxWidth`     | `300`                                                  | Maximum width for image previews (points)                                                     |
 
 ## Supported file types
 
