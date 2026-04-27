@@ -41,8 +41,7 @@ function findTldrPathAtPosition(
 	const tldrExtension = '.tldr'
 	let searchIndex = 0
 
-	// eslint-disable-next-line ts/no-unnecessary-condition
-	while (true) {
+	while (searchIndex < line.length) {
 		const tldrIndex = line.indexOf(tldrExtension, searchIndex)
 		if (tldrIndex === -1) {
 			break
@@ -98,8 +97,7 @@ function findTldrPathAtPosition(
 		if (character >= startIndex && character <= endIndex) {
 			return {
 				end: endIndex,
-				// eslint-disable-next-line unicorn/prefer-string-slice
-				path: line.substring(startIndex, endIndex),
+				path: line.slice(startIndex, endIndex),
 				start: startIndex,
 			}
 		}
