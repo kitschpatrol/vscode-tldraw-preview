@@ -258,7 +258,6 @@ function createHoverContent(
 
 	if (!entry) {
 		const md = new vscode.MarkdownString()
-		md.isTrusted = true
 		md.supportHtml = true
 		md.appendMarkdown('### ⚠️ Not in cache\n\n')
 		md.appendMarkdown(`\`${tldrPath}\`\n\n`)
@@ -272,7 +271,6 @@ function createHoverContent(
 
 	if (!fs.existsSync(cachedPath)) {
 		const md = new vscode.MarkdownString()
-		md.isTrusted = true
 		md.supportHtml = true
 		md.appendMarkdown('### ⚠️ Cache file missing\n\n')
 		md.appendMarkdown(`\`${entry.result}\`\n\n`)
