@@ -131,7 +131,12 @@ function getManifest(manifestPath: string): Manifest {
 	}
 }
 
-function getManifestPath(document: vscode.TextDocument): string | undefined {
+type ResolvedConfig = {
+	manifestPath: string
+	maxWidth: number
+}
+
+function readConfig(document: vscode.TextDocument): ResolvedConfig | undefined {
 	const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri)
 	if (!workspaceFolder) {
 		return undefined
@@ -142,12 +147,13 @@ function getManifestPath(document: vscode.TextDocument): string | undefined {
 		'manifestPath',
 		'node_modules/.cache/tldraw/.tldraw-plugin-cache.json',
 	)
+	const maxWidth = config.get<number>('maxWidth', 300)
 
-	if (path.isAbsolute(configuredPath)) {
-		return configuredPath
-	}
+	const manifestPath = path.isAbsolute(configuredPath)
+		? configuredPath
+		: path.join(workspaceFolder.uri.fsPath, configuredPath)
 
-	return path.join(workspaceFolder.uri.fsPath, configuredPath)
+	return { manifestPath, maxWidth }
 }
 
 /**
@@ -233,10 +239,8 @@ function createHoverContent(
 	manifest: Manifest,
 	manifestPath: string,
 	documentDirectory: string,
+	maxWidth: number,
 ): vscode.MarkdownString {
-	const config = vscode.workspace.getConfiguration('tldraw-preview')
-	const maxWidth = config.get<number>('maxWidth', 300)
-
 	// Split path and query string
 	const queryIndex = tldrPath.indexOf('?')
 	const filePath = queryIndex === -1 ? tldrPath : tldrPath.slice(0, Math.max(0, queryIndex))
@@ -297,15 +301,21 @@ class TldrawHoverProvider implements vscode.HoverProvider {
 			return undefined
 		}
 
-		const manifestPath = getManifestPath(document)
-		if (!manifestPath) {
+		const config = readConfig(document)
+		if (!config) {
 			return undefined
 		}
 
 		const documentDirectory = path.dirname(document.uri.fsPath)
 		const range = new vscode.Range(position.line, found.start, position.line, found.end)
-		const manifest = getManifest(manifestPath)
-		const content = createHoverContent(found.path, manifest, manifestPath, documentDirectory)
+		const manifest = getManifest(config.manifestPath)
+		const content = createHoverContent(
+			found.path,
+			manifest,
+			config.manifestPath,
+			documentDirectory,
+			config.maxWidth,
+		)
 
 		return new vscode.Hover(content, range)
 	}
