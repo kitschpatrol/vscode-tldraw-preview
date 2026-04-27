@@ -21,8 +21,8 @@ suite('Tldraw Hover Provider', () => {
 			path.relative(manifestDirectory, path.join(fixturesPath, filePath))
 
 		const manifest = {
-			[`${relativeToCache('test-sketch.tldr')}?dark=true`]: {
-				result: 'test-sketch-f547edfc.svg',
+			[`${relativeToCache('test-sketch.tldr')}?{"dark":true}`]: {
+				result: 'test-sketch-6f77fa00.svg',
 			},
 			[relativeToCache('missing.tldr')]: {
 				result: 'nonexistent.svg',
@@ -147,11 +147,15 @@ suite('Tldraw Hover Provider', () => {
 	})
 
 	test('correctly handles .tldr path with query parameters', async () => {
-		// Line 13: const withQuery = './test-sketch.tldr?dark=true'
+		// Line 13: const withQuery = './test-sketch.tldr?dark=true&tldr'
 		const hovers = await getHoverAt(12, 25)
 
 		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
 		const text = getHoverText(hovers[0])
 		assert.ok(text.includes('<img'), 'Should contain an img tag for path with query params')
+		assert.ok(
+			text.includes('test-sketch-6f77fa00.svg'),
+			'Should resolve to the dark variant from the JSON-encoded manifest key',
+		)
 	})
 })
