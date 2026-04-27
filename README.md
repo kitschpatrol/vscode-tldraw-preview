@@ -16,7 +16,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/kitschpatrol/vscode-tldraw-preview/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/vscode-tldraw-preview/actions/workflows/ci.yml)
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/kitschpatrol.tldraw-preview.svg?color=eee&label=VS%20Code%20Marketplace&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=kitschpatrol.tldraw-preview)
+[![Visual Studio Marketplace Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkitschpatrol%2Fvscode-tldraw-preview%2Frefs%2Fheads%2Fmain%2Fpackage.json&query=version&label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=kitschpatrol.tldraw-preview)
 
 <!-- /badges -->
 

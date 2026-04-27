@@ -26,9 +26,12 @@ const delimiterPairs: Record<string, string> = {
 	'`': '`',
 }
 
+const URL_BOUNDARY_REGEX = /[\s)[\]>]/
+const COMMON_TERMINATORS_REGEX = /[\s"'`()[\]<>]/
+
 /**
- * Find a `.tldr` file path at the given position in a line, handling paths
- * with spaces when they're inside quotes or angle brackets.
+ * Find a `.tldr` file path at the given position in a line, handling paths with
+ * spaces when they're inside quotes or angle brackets.
  */
 function findTldrPathAtPosition(
 	line: string,
@@ -59,7 +62,7 @@ function findTldrPathAtPosition(
 			}
 
 			// If we hit whitespace or a closing bracket, stop
-			if (/[\s)[\]>]/.test(char)) {
+			if (URL_BOUNDARY_REGEX.test(char)) {
 				startIndex = i + 1
 				break
 			}
@@ -79,7 +82,7 @@ function findTldrPathAtPosition(
 		} else {
 			// No delimiter — stop at whitespace or common terminators
 			const remaining = line.slice(Math.max(0, afterTldr))
-			const match = /[\s"'`()[\]<>]/.exec(remaining)
+			const match = COMMON_TERMINATORS_REGEX.exec(remaining)
 			endIndex = match?.index === undefined ? line.length : afterTldr + match.index
 		}
 
@@ -146,8 +149,9 @@ function getManifestPath(document: vscode.TextDocument): string | undefined {
 }
 
 /**
- * Parse import query params into the JSON format used by unplugin-tldraw for manifest keys.
- * Mirrors the parsing logic in unplugin-tldraw's `parseImportOverrides`.
+ * Parse import query params into the JSON format used by unplugin-tldraw for
+ * manifest keys. Mirrors the parsing logic in unplugin-tldraw's
+ * `parseImportOverrides`.
  */
 function parseQueryToManifestKey(queryString: string): string {
 	const params = new URLSearchParams(queryString)
@@ -193,9 +197,9 @@ function parseQueryToManifestKey(queryString: string): string {
 }
 
 /**
- * Look up a `.tldr` path in the manifest.
- * Keys in the manifest are relative to the cache directory, with query params
- * stored as JSON (e.g. `path.tldr?{"dark":true}`).
+ * Look up a `.tldr` path in the manifest. Keys in the manifest are relative to
+ * the cache directory, with query params stored as JSON (e.g.
+ * `path.tldr?{"dark":true}`).
  */
 function findManifestEntry(
 	relativeTldrPath: string,
