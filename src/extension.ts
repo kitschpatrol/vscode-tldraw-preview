@@ -26,8 +26,9 @@ const delimiterPairs: Record<string, string> = {
 	'`': '`',
 }
 
-const URL_BOUNDARY_REGEX = /[\s)[\]>]/
-const COMMON_TERMINATORS_REGEX = /[\s"'`()[\]<>]/
+const WALK_BACK_TERMINATORS_REGEX = /[\s)[\]>=,;{}]/
+const WALK_FORWARD_TERMINATORS_REGEX = /[\s"'`()[\]<>=,;{}]/
+const TLDR_EXTENSION_BOUNDARY_REJECT_REGEX = /[A-Z0-9]/i
 
 /**
  * Find a `.tldr` file path at the given position in a line, handling paths with
@@ -48,8 +49,8 @@ function findTldrPathAtPosition(
 		}
 
 		// Reject matches inside longer extensions like `.tldraw`
-		const charAfter = line[tldrIndex + tldrExtension.length]
-		if (charAfter !== undefined && /[A-Za-z0-9]/.test(charAfter)) {
+		const charAfter = line.charAt(tldrIndex + tldrExtension.length)
+		if (TLDR_EXTENSION_BOUNDARY_REJECT_REGEX.test(charAfter)) {
 			searchIndex = tldrIndex + 1
 			continue
 		}
@@ -69,7 +70,7 @@ function findTldrPathAtPosition(
 			}
 
 			// If we hit whitespace or a closing bracket, stop
-			if (URL_BOUNDARY_REGEX.test(char)) {
+			if (WALK_BACK_TERMINATORS_REGEX.test(char)) {
 				startIndex = i + 1
 				break
 			}
@@ -88,8 +89,8 @@ function findTldrPathAtPosition(
 			endIndex = closePos === -1 ? afterTldr : closePos
 		} else {
 			// No delimiter — stop at whitespace or common terminators
-			const remaining = line.slice(Math.max(0, afterTldr))
-			const match = COMMON_TERMINATORS_REGEX.exec(remaining)
+			const remaining = line.slice(afterTldr)
+			const match = WALK_FORWARD_TERMINATORS_REGEX.exec(remaining)
 			endIndex = match?.index === undefined ? line.length : afterTldr + match.index
 		}
 
@@ -103,7 +104,7 @@ function findTldrPathAtPosition(
 			}
 		}
 
-		searchIndex = tldrIndex + 1
+		searchIndex = endIndex
 	}
 
 	return undefined
@@ -243,8 +244,8 @@ function createHoverContent(
 ): vscode.MarkdownString {
 	// Split path and query string
 	const queryIndex = tldrPath.indexOf('?')
-	const filePath = queryIndex === -1 ? tldrPath : tldrPath.slice(0, Math.max(0, queryIndex))
-	const queryString = queryIndex === -1 ? undefined : tldrPath.slice(Math.max(0, queryIndex + 1))
+	const filePath = queryIndex === -1 ? tldrPath : tldrPath.slice(0, queryIndex)
+	const queryString = queryIndex === -1 ? undefined : tldrPath.slice(queryIndex + 1)
 
 	// Resolve to absolute, then make relative to cache directory (manifest keys are relative to it)
 	const cacheDirectory = path.dirname(manifestPath)
