@@ -322,18 +322,22 @@ class TldrawHoverProvider implements vscode.HoverProvider {
 	}
 }
 
+const ON_LANGUAGE_PREFIX = 'onLanguage:'
+
 export function activate(context: vscode.ExtensionContext): void {
-	const supportedLanguages = [
-		'mdx',
-		'html',
-		'markdown',
-		'astro',
-		'svelte',
-		'javascript',
-		'typescript',
-		'javascriptreact',
-		'typescriptreact',
-	]
+	// Derive the supported languages from `activationEvents` in package.json so the
+	// list lives in exactly one place.
+	const packageJson: unknown = context.extension.packageJSON
+	const activationEvents =
+		typeof packageJson === 'object' &&
+		packageJson !== null &&
+		'activationEvents' in packageJson &&
+		Array.isArray(packageJson.activationEvents)
+			? packageJson.activationEvents.filter((event): event is string => typeof event === 'string')
+			: []
+	const supportedLanguages = activationEvents
+		.filter((event) => event.startsWith(ON_LANGUAGE_PREFIX))
+		.map((event) => event.slice(ON_LANGUAGE_PREFIX.length))
 
 	const selector: vscode.DocumentSelector = supportedLanguages.map((lang) => ({
 		language: lang,
