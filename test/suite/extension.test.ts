@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/consistent-function-scoping */
-
 import { suite, suiteSetup, test } from 'mocha'
 import * as assert from 'node:assert'
 import * as fs from 'node:fs'
@@ -68,11 +66,7 @@ suite('Tldraw Hover Provider', () => {
 					return content
 				}
 
-				if (content instanceof vscode.MarkdownString) {
-					return content.value
-				}
-
-				return ''
+				return content instanceof vscode.MarkdownString ? content.value : ''
 			})
 			.join('\n')
 	}
@@ -81,8 +75,9 @@ suite('Tldraw Hover Provider', () => {
 		// Line 4: const existingDrawing = './test-sketch.tldr'
 		const hovers = await getHoverAt(3, 30)
 
-		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
-		const text = getHoverText(hovers[0])
+		const [firstHover] = hovers ?? []
+		assert.ok(firstHover, 'Should return a hover')
+		const text = getHoverText(firstHover)
 		assert.ok(text.includes('<img'), 'Should contain an img tag')
 		assert.ok(text.includes('test-sketch-f547edfc.svg'), 'Should show the filename')
 	})
@@ -91,8 +86,9 @@ suite('Tldraw Hover Provider', () => {
 		// Line 6: const notCached = './not-in-manifest.tldr'
 		const hovers = await getHoverAt(5, 20)
 
-		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
-		const text = getHoverText(hovers[0])
+		const [firstHover] = hovers ?? []
+		assert.ok(firstHover, 'Should return a hover')
+		const text = getHoverText(firstHover)
 		assert.ok(text.includes('Not in cache'), "Should show 'Not in cache'")
 		assert.ok(text.includes('not-in-manifest.tldr'), 'Should show the path')
 	})
@@ -101,8 +97,9 @@ suite('Tldraw Hover Provider', () => {
 		// Line 5: const missingFile = './missing.tldr'
 		const hovers = await getHoverAt(4, 25)
 
-		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
-		const text = getHoverText(hovers[0])
+		const [firstHover] = hovers ?? []
+		assert.ok(firstHover, 'Should return a hover')
+		const text = getHoverText(firstHover)
 		assert.ok(text.includes('Cache file missing'), "Should show 'Cache file missing'")
 	})
 
@@ -121,8 +118,9 @@ suite('Tldraw Hover Provider', () => {
 		// Line 8: const inBrackets = ['./test-sketch.tldr']
 		const hovers = await getHoverAt(7, 25)
 
-		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
-		const text = getHoverText(hovers[0])
+		const [firstHover] = hovers ?? []
+		assert.ok(firstHover, 'Should return a hover')
+		const text = getHoverText(firstHover)
 		assert.ok(text.includes('<img'), 'Should contain an img tag')
 	})
 
@@ -130,8 +128,9 @@ suite('Tldraw Hover Provider', () => {
 		// Line 11: const inParens = ('./test-sketch.tldr')
 		const hovers = await getHoverAt(10, 25)
 
-		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
-		const text = getHoverText(hovers[0])
+		const [firstHover] = hovers ?? []
+		assert.ok(firstHover, 'Should return a hover')
+		const text = getHoverText(firstHover)
 		assert.ok(text.includes('<img'), 'Should contain an img tag')
 	})
 
@@ -150,8 +149,9 @@ suite('Tldraw Hover Provider', () => {
 		// Line 13: const withQuery = './test-sketch.tldr?dark=true&tldr'
 		const hovers = await getHoverAt(12, 25)
 
-		assert.ok(hovers && hovers.length > 0, 'Should return a hover')
-		const text = getHoverText(hovers[0])
+		const [firstHover] = hovers ?? []
+		assert.ok(firstHover, 'Should return a hover')
+		const text = getHoverText(firstHover)
 		assert.ok(text.includes('<img'), 'Should contain an img tag for path with query params')
 		assert.ok(
 			text.includes('test-sketch-6f77fa00.svg'),

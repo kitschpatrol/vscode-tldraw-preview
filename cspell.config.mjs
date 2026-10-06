@@ -1,5 +1,3 @@
 import { cspellConfig } from '@kitschpatrol/cspell-config'
 
-export default cspellConfig({
-	ignorePaths: ['./out-test/**/*'],
-})
+export default cspellConfig()

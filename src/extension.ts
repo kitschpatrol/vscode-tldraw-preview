@@ -19,16 +19,41 @@ type ManifestCache = {
 const manifestCache = new Map<string, ManifestCache>()
 
 // Map of opening delimiters to their closing counterparts
-const delimiterPairs: Record<string, string> = {
-	'"': '"',
-	"'": "'",
-	'<': '>',
-	'`': '`',
-}
+const delimiterPairs = new Map([
+	["'", "'"],
+	['"', '"'],
+	['<', '>'],
+	['`', '`'],
+])
 
-const WALK_BACK_TERMINATORS_REGEX = /[\s)[\]>=,;{}]/
-const WALK_FORWARD_TERMINATORS_REGEX = /[\s"'`()[\]<>=,;{}]/
-const TLDR_EXTENSION_BOUNDARY_REJECT_REGEX = /[A-Z0-9]/i
+const WALK_BACK_TERMINATORS_REGEX = /[\s\)\[\]>=,;\{\}]/v
+const WALK_FORWARD_TERMINATORS_REGEX = /[\s"'`\(\)\[\]<>=,;\{\}]/v
+const TLDR_EXTENSION_BOUNDARY_REJECT_REGEX = /[\dA-Za-z]/v
+
+/**
+ * Walk backward from a `.tldr` match to find where its path starts, and the
+ * opening delimiter (if any) that encloses it.
+ */
+function findPathStart(
+	line: string,
+	tldrIndex: number,
+): { openingDelimiter: string; startIndex: number } {
+	for (let i = tldrIndex - 1; i >= 0; i--) {
+		const char = line.charAt(i)
+
+		// If we hit a known opening delimiter, the path starts after it
+		if (delimiterPairs.has(char)) {
+			return { openingDelimiter: char, startIndex: i + 1 }
+		}
+
+		// If we hit whitespace or a closing bracket, stop
+		if (WALK_BACK_TERMINATORS_REGEX.test(char)) {
+			return { openingDelimiter: '', startIndex: i + 1 }
+		}
+	}
+
+	return { openingDelimiter: '', startIndex: 0 }
+}
 
 /**
  * Find a `.tldr` file path at the given position in a line, handling paths with
@@ -54,43 +79,22 @@ function findTldrPathAtPosition(
 			continue
 		}
 
-		// Walk backward from the `.tldr` to find the start of the path
-		let startIndex = tldrIndex
-		let openingDelimiter = ''
-
-		for (let i = tldrIndex - 1; i >= 0; i--) {
-			const char = line[i]
-
-			// If we hit a known opening delimiter, the path starts after it
-			if (char in delimiterPairs) {
-				openingDelimiter = char
-				startIndex = i + 1
-				break
-			}
-
-			// If we hit whitespace or a closing bracket, stop
-			if (WALK_BACK_TERMINATORS_REGEX.test(char)) {
-				startIndex = i + 1
-				break
-			}
-
-			startIndex = i
-		}
+		const { openingDelimiter, startIndex } = findPathStart(line, tldrIndex)
 
 		// Determine end boundary
-		const closingDelimiter = delimiterPairs[openingDelimiter]
+		const closingDelimiter = delimiterPairs.get(openingDelimiter)
 		const afterTldr = tldrIndex + tldrExtension.length
 		let endIndex: number
 
-		if (closingDelimiter) {
-			// Inside delimiters — include everything up to the closing delimiter
-			const closePos = line.indexOf(closingDelimiter, afterTldr)
-			endIndex = closePos === -1 ? afterTldr : closePos
-		} else {
+		if (closingDelimiter === undefined) {
 			// No delimiter — stop at whitespace or common terminators
 			const remaining = line.slice(afterTldr)
 			const match = WALK_FORWARD_TERMINATORS_REGEX.exec(remaining)
 			endIndex = match?.index === undefined ? line.length : afterTldr + match.index
+		} else {
+			// Inside delimiters — include everything up to the closing delimiter
+			const closePos = line.indexOf(closingDelimiter, afterTldr)
+			endIndex = closePos === -1 ? afterTldr : closePos
 		}
 
 		// Check if cursor is within this path
@@ -119,7 +123,6 @@ function getManifest(manifestPath: string): Manifest {
 		}
 
 		const content = fs.readFileSync(manifestPath, 'utf8')
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		const manifest = JSON.parse(content) as Manifest
 
 		manifestCache.set(manifestPath, { manifest, mtime })
@@ -156,6 +159,37 @@ function readConfig(document: vscode.TextDocument): ResolvedConfig | undefined {
 }
 
 /**
+ * Parse a single import query param into its override value, or `undefined` if
+ * the param isn't a recognized override (including the `tldr` / `tldraw` import
+ * markers) or its value is invalid.
+ */
+function parseOverrideValue(key: string, value: string): boolean | number | string | undefined {
+	switch (key) {
+		case 'dark':
+		case 'stripStyle':
+		case 'transparent': {
+			return value === 'true' || value === ''
+		}
+
+		case 'format':
+		case 'frame':
+		case 'page': {
+			return value
+		}
+
+		case 'padding':
+		case 'scale': {
+			const numberValue = Number(value)
+			return Number.isNaN(numberValue) ? undefined : numberValue
+		}
+
+		default: {
+			return undefined
+		}
+	}
+}
+
+/**
  * Parse import query params into the JSON format used by unplugin-tldraw for
  * manifest keys. Mirrors the parsing logic in unplugin-tldraw's
  * `parseImportOverrides`.
@@ -164,39 +198,10 @@ function parseQueryToManifestKey(queryString: string): string {
 	const params = new URLSearchParams(queryString)
 	const overrides: Record<string, boolean | number | string> = {}
 
-	for (const [key, value] of params.entries()) {
-		if (key === 'tldr' || key === 'tldraw') {
-			continue
-		}
-
-		switch (key) {
-			case 'dark':
-			case 'stripStyle':
-			case 'transparent': {
-				overrides[key] = value === 'true' || value === ''
-				break
-			}
-
-			case 'format':
-			case 'frame':
-			case 'page': {
-				overrides[key] = value
-				break
-			}
-
-			case 'padding':
-			case 'scale': {
-				const numberValue = Number(value)
-				if (!Number.isNaN(numberValue)) {
-					overrides[key] = numberValue
-				}
-
-				break
-			}
-
-			default: {
-				break
-			}
+	for (const [key, value] of params) {
+		const override = parseOverrideValue(key, value)
+		if (override !== undefined) {
+			overrides[key] = override
 		}
 	}
 
@@ -213,24 +218,18 @@ function findManifestEntry(
 	queryString: string | undefined,
 	manifest: Manifest,
 ): ManifestEntry | undefined {
-	if (queryString) {
+	if (queryString !== undefined && queryString !== '') {
 		const manifestQuery = parseQueryToManifestKey(queryString)
-		if (manifestQuery) {
-			const keyWithQuery = `${relativeTldrPath}?${manifestQuery}`
-			// eslint-disable-next-line ts/no-unnecessary-condition
-			if (manifest[keyWithQuery]) {
-				return manifest[keyWithQuery]
+		if (manifestQuery !== '') {
+			const entryWithQuery = manifest[`${relativeTldrPath}?${manifestQuery}`]
+			if (entryWithQuery) {
+				return entryWithQuery
 			}
 		}
 	}
 
 	// Exact match without query string
-	// eslint-disable-next-line ts/no-unnecessary-condition
-	if (manifest[relativeTldrPath]) {
-		return manifest[relativeTldrPath]
-	}
-
-	return undefined
+	return manifest[relativeTldrPath]
 }
 
 function createHoverContent(

@@ -12,13 +12,11 @@ export default eslintConfig(
 		ts: {
 			overrides: {
 				'jsdoc/require-jsdoc': 'off',
-				'ts/no-empty-function': 'off',
-				'ts/no-unnecessary-type-arguments': 'off',
 			},
 		},
 	},
 	{
-		files: ['LICENSE.txt', 'README.md'],
+		files: ['README.md'],
 		rules: {
 			'unicorn/filename-case': 'off',
 		},

@@ -8,6 +8,4 @@ export default knipConfig({
 		'test/suite/index.ts',
 	],
 	ignore: ['test/fixtures/workspace/*'],
-	ignoreBinaries: ['code'],
-	ignoreDependencies: ['@types/vscode', '@types/mocha'],
 })

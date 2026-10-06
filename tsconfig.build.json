@@ -1,9 +1,10 @@
 {
 	"compilerOptions": {
-		"target": "ES2022",
-		"lib": ["ES2022"],
+		"target": "ES2024",
+		"lib": ["ES2024"],
 		"rootDir": "src",
 		"module": "Node16",
+		"types": ["node"],
 		"strict": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
@@ -11,7 +12,5 @@
 		"outDir": "dist",
 		"sourceMap": true
 	},
-
-	// Includes project dot-files files for typescript-eslint integration
-	"include": ["src/**/*"]
+	"include": ["src/"]
 }

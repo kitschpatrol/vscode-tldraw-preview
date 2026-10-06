@@ -4,19 +4,11 @@
 
 <!-- /title -->
 
-<!-- badges({
-  npm: [],
-  custom: {
-    "Visual Studio Marketplace Version": {
-      image: "https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkitschpatrol%2Fvscode-tldraw-preview%2Frefs%2Fheads%2Fmain%2Fpackage.json&query=version&label=VS%20Code%20Marketplace",
-      link: "https://marketplace.visualstudio.com/items?itemName=kitschpatrol.tldraw-preview",
-    },
-  }
-}) -->
+<!-- badges -->
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/vscode-tldraw-preview/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/vscode-tldraw-preview/actions/workflows/ci.yml)
-[![Visual Studio Marketplace Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkitschpatrol%2Fvscode-tldraw-preview%2Frefs%2Fheads%2Fmain%2Fpackage.json&query=version&label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=kitschpatrol.tldraw-preview)
+[![Visual Studio Marketplace Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkitschpatrol%2Fvscode-tldraw-preview%2FHEAD%2Fpackage.json&query=version&label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=kitschpatrol.tldraw-preview)
 
 <!-- /badges -->
 
@@ -48,10 +40,14 @@ This extension is extremely niche and is _not_ a part of the official [tldraw](h
 
 The extension provides the following settings:
 
+<!-- vscode-settings -->
+
 | Setting                       | Default                                                | Description                                                                                   |
 | ----------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
 | `tldraw-preview.manifestPath` | `node_modules/.cache/tldraw/.tldraw-plugin-cache.json` | Path to the unplugin-tldraw cache manifest file. Absolute, or relative to the workspace root. |
-| `tldraw-preview.maxWidth`     | `300`                                                  | Maximum width for image previews (points)                                                     |
+| `tldraw-preview.maxWidth`     | `300`                                                  | Maximum width in logical points for image previews                                            |
+
+<!-- /vscode-settings -->
 
 ## Supported file types
 

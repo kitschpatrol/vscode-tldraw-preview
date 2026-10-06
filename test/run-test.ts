@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/no-process-exit */
-/* eslint-disable unicorn/prefer-top-level-await */
 
 import { runTests } from '@vscode/test-electron'
 import * as path from 'node:path'
@@ -11,14 +10,16 @@ async function main(): Promise<void> {
 	const extensionTestsPath = path.resolve(__dirname, './suite/index')
 	const testWorkspace = path.join(projectRoot, 'test/fixtures/workspace')
 
-	await runTests({
-		extensionDevelopmentPath,
-		extensionTestsPath,
-		launchArgs: [testWorkspace, '--disable-extensions'],
-	})
+	try {
+		await runTests({
+			extensionDevelopmentPath,
+			extensionTestsPath,
+			launchArgs: [testWorkspace, '--disable-extensions'],
+		})
+	} catch (error) {
+		console.error('Failed to run tests:', error)
+		process.exit(1)
+	}
 }
 
-main().catch((error: unknown) => {
-	console.error('Failed to run tests:', error)
-	process.exit(1)
-})
+void main()
