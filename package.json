@@ -83,21 +83,21 @@
 		"onLanguage:typescriptreact"
 	],
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^8.12.1",
+		"@kitschpatrol/shared-config": "^8.13.1",
 		"@types/mocha": "^10.0.10",
-		"@types/node": "~22.19.19",
+		"@types/node": "~22.19.21",
 		"@types/vscode": "1.105.0",
 		"@vscode/test-electron": "^3.1.0",
 		"@vscode/vsce": "^4.0.0",
 		"bumpp": "^12.3.0",
 		"mocha": "^12.0.3",
 		"shx": "^0.4.0",
-		"skills": "^1.7.0",
+		"skills": "^1.7.2",
 		"typescript": "~6.0.3"
 	},
-	"packageManager": "pnpm@12.9.1",
+	"packageManager": "pnpm@12.11.2",
 	"engines": {
-		"node": ">=22.19.0",
+		"node": "^22.19.0 || ^24.0.0 || >=26.0.0",
 		"vscode": "^1.105.0"
 	},
 	"devEngines": {
