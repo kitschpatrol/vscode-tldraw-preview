@@ -42,11 +42,10 @@
 	],
 	"scripts": {
 		"build": "tsc -p ./tsconfig.build.json",
-		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX -e !.claude/",
+		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
 		"pack": "pnpm build && vsce package --no-dependencies",
-		"prepare": "skills experimental_sync -y -f",
 		"release": "bumpp --commit 'Release: %s' && pnpm build && vsce publish --no-dependencies --no-update-package-json --no-git-tag-version --pat $(op read 'op://Personal/Azure VS Code/credential')",
 		"pretest": "pnpm build && tsc -p ./tsconfig.test.json",
 		"test": "node ./out-test/test/run-test.js",
@@ -83,7 +82,7 @@
 		"onLanguage:typescriptreact"
 	],
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^8.13.1",
+		"@kitschpatrol/shared-config": "^8.14.0",
 		"@types/mocha": "^10.0.10",
 		"@types/node": "~22.19.21",
 		"@types/vscode": "1.105.0",
@@ -92,10 +91,9 @@
 		"bumpp": "^12.3.0",
 		"mocha": "^12.0.3",
 		"shx": "^0.4.0",
-		"skills": "^1.7.2",
 		"typescript": "~6.0.3"
 	},
-	"packageManager": "pnpm@12.11.2",
+	"packageManager": "pnpm@12.15.0",
 	"engines": {
 		"node": "^22.19.0 || ^24.0.0 || >=26.0.0",
 		"vscode": "^1.105.0"
