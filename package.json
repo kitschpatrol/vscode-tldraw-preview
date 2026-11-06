@@ -46,7 +46,7 @@
 		"fix": "ksc fix",
 		"lint": "ksc lint",
 		"pack": "pnpm build && vsce package --no-dependencies",
-		"release": "bumpp --commit 'Release: %s' && pnpm build && vsce publish --no-dependencies --no-update-package-json --no-git-tag-version --pat $(op read 'op://Personal/Azure VS Code/credential')",
+		"release": "bumpp --commit 'Release: %s' --all --execute 'chagent' && pnpm build && vsce publish --no-dependencies --no-update-package-json --no-git-tag-version --pat $(op read 'op://Personal/Azure VS Code/credential')",
 		"pretest": "pnpm build && tsc -p ./tsconfig.test.json",
 		"test": "node ./out-test/test/run-test.js",
 		"test-interactive": "code --extensionDevelopmentPath=\"$PWD\" test/fixtures/workspace"
@@ -82,6 +82,7 @@
 		"onLanguage:typescriptreact"
 	],
 	"devDependencies": {
+		"@kitschpatrol/chagent": "0.4.0",
 		"@kitschpatrol/shared-config": "^8.14.0",
 		"@types/mocha": "^10.0.10",
 		"@types/node": "~22.19.21",

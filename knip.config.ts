@@ -8,4 +8,7 @@ export default knipConfig({
 		'test/suite/index.ts',
 	],
 	ignore: ['test/fixtures/workspace/*'],
+	ignoreDependencies: [
+		'@kitschpatrol/chagent', // Typically invoked through bumpp's --execute argument, which Knip doesn't parse
+	],
 })

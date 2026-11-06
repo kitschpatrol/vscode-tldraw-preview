@@ -2,7 +2,7 @@ import { eslintConfig } from '@kitschpatrol/eslint-config'
 
 export default eslintConfig(
 	{
-		ignores: ['test/fixtures/workspace/sample-dom.js'],
+		ignores: ['test/fixtures/workspace/sample-dom.js', '**/changelog.md'],
 		json: {
 			overrides: {
 				// VS Code bundler needs LICENSE.txt listed in the package.json
